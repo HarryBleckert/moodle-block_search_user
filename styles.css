@@ -1,0 +1,73 @@
+
+table, td, th {
+  border: 1px solid;
+}
+
+table {
+  border-collapse: collapse;
+}
+
+div#search_user {
+    width: 90%;
+    margin: auto;
+}
+
+div#search_user input {
+    width: 100%;
+    text-align: left;
+}
+
+div#search_user_results {
+    max-height: 400px;
+    overflow-y: auto;
+    font-size: 11px;
+    margin-top: 10px;
+}
+
+div#search_user_results a img {
+    width: 12px;
+}
+
+div#search_user_results a img.userpicture {
+    width: 20px;
+    height: 20px;
+}
+
+img#search_user_loading {
+    width: 20px;
+}
+
+div.search_user_loading {
+    text-align: center;
+}
+
+div.search_user_links {
+    text-align: center;
+    margin-bottom: 5px;
+    display: none;
+}
+
+div.search_user_links a {
+    margin: 0 10px;
+}
+
+div.search_user_result {
+    margin-bottom: 10px;
+}
+
+.search_user_centre {
+    text-align: center;
+}
+
+img.search_user_toggle {
+    width: 16px;
+    vertical-align: middle;
+}
+
+p.search_user_clear {
+    text-align: center;
+}
+
+p.search_user_results_heading {
+    text-align: center;
+}
