@@ -52,7 +52,6 @@ class block_search_user extends block_base
      * @throws coding_exception
      */
     public function get_content() {
-
         global $COURSE;
 
         if ($this->content !== null) {
