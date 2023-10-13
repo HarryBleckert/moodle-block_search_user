@@ -29,7 +29,7 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * Quick User block
  * @package    block_search_user
- * @copyright  2022 onwards Harry@Bleckert.com for ASH Berlin <https://ASH-Berlin.eu>
+ * @copyright  2022 onwards Harry@Bleckert.com for ASH Berlin {link:https://ASH-Berlin.eu}
  * Fork of block_quick_user
  * @copyright  2019 Conn Warwicker <conn@cmrwarwicker.com>
  * @link       https://github.com/HarryBleckert/moodle-block_search_user
