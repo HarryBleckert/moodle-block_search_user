@@ -52,6 +52,7 @@ $string['courses'] = 'Kurse';
 $string['course'] = 'Kurs';
 $string['course_shortname'] = 'Kurzbezeichnung';
 $string['course_fullname'] = 'Kursbezeichnung';
+$string['category'] = 'Kategorie';
 $string['role'] = 'Rolle';
 $string['roles'] = 'Rollen';
 $string['profile'] = 'Profil';

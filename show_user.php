@@ -106,7 +106,8 @@ if ( $courses = courses_of_mid( $userid ) )
 	print "<br><b>".(count($courses)>1 ?count($courses)." " . su_get_string('courses') :su_get_string('course'))."</b>:<table>\n";
 	print "<tr " .'style="font-weight:bolder;"'.">\n";
 	print "<th>" .su_get_string('courseid') . "</th><th>" .su_get_string('role'). "</th><th>"
-				 .su_get_string('course_shortname')."</th><th>".su_get_string('course_fullname')."</th>\n";
+				 .su_get_string('course_shortname')."</th><th>".su_get_string('course_fullname')."</th><th>"
+                 .su_get_string('category') ."</th>\n";
 	print "</tr>\n";
 	
 	foreach ( $courses as $course )
@@ -117,8 +118,11 @@ if ( $courses = courses_of_mid( $userid ) )
 		$fullname = '<span id="short_'.$course->courseid.'" 
 							onclick="toggleviewparts(\''.$course->courseid.'\');">' . $fullname . '</span>'.$show; 	
 		$viewCourse = '<a href="/course/view.php?id='.$course->courseid.'" target="viewCourse">'.$course->courseid ."</a>\n";
+        $Studiengang = get_course_of_studies($course->courseid);  // get Studiengang with link
+        // $semester = su_get_course_of_studies($courseid, true, true);  // get Semester with link
 		print '<tr title="' . su_get_string('open_parts_list', su_get_string('course_fullname') ) .'">' ."\n";
-		print "<td>$viewCourse</td><td>$roles</td><td>$shortname</td><td>$fullname</td>\n";
+		print "<td>$viewCourse</td><td>$roles</td><td>$shortname</td><td>$fullname</td><td>$Studiengang</td>\n";
+
 		print "</tr>\n";
 	}	
 	print "</table>\n";
@@ -204,9 +208,9 @@ function su_get_enrolled_users( $course )
 // get Studiengang name of course from course_categories path
 function get_course_of_studies( $courseid )
 {	global $DB;
-	// ASH specific organisation of cours of studies (Studiengänge) = Level 2
+	// ASH specific organisation of course of studies (Studiengänge) = Level 2
 	// Semester is level 3
-	define('COURSE_OF_STUDIES_PATH', 2 );
+	$COURSE_OF_STUDIES_PATH = 2;
 
 	$course = $DB->get_record('course', array('id' => $courseid), '*'); //get_course($courseid);
 	if ( !isset($course->category) )
@@ -215,9 +219,9 @@ function get_course_of_studies( $courseid )
 	//print_r("Course category path: " .$cat->path . ""<br>\n");
 	$path = explode("/",$cat->path);
 	$semesterCat = $path[1];
-	if ( empty($semesterCat) OR !isset($path[COURSE_OF_STUDIES_PATH]) )
+	if ( empty($semesterCat) OR !isset($path[$COURSE_OF_STUDIES_PATH]) )
 	{	return ""; }
-	$studiengangCat = $path[COURSE_OF_STUDIES_PATH];
+	$studiengangCat = $path[$COURSE_OF_STUDIES_PATH];
 	//echo ""Course of Studies path: $studiengangCat<br>\n";	
 	if ( empty($studiengangCat) )
 	{	return ""; }
@@ -228,10 +232,7 @@ function get_course_of_studies( $courseid )
 	return "";
 }
 
-
-
 ?>
-
 <script>
 var showing = false;
 function toggleviewparts( courseid )
@@ -246,5 +247,72 @@ function toggleviewparts( courseid )
 	return true;
 }
 </script>
+<?php
 
+// get Studiengang and optionally Semester name of course from course_categories path 2 (ASH)
+function su_get_course_of_studies($courseid, $link = false, $showsemester = false) {
+global $DB;
+$COURSE_OF_STUDIES_PATH = 2;
+if (empty($courseid) or $courseid == SITEID) {
+return "";
+}
+if (!$showsemester and !$link) {
+    $studiengang = $DB->get_record_sql("SELECT id, name AS name, description FROM {course} 
+                                         WHERE id = $courseid LIMIT 1");
+    if (isset($studiengang->name) and !empty($studiengang->name)) {
+        return $studiengang->name;
+    }
+}
+if ($showsemester or $link or !isset($studiengang->name) or empty($studiengang->name)) {
+    $course = $DB->get_record('course', array('id' => $courseid), '*'); //get_course($courseid);
+    if (!isset($course->category) and !$showsemester) {
+    return "";
+    }
+$cat = $DB->get_record_sql("select id,path from {course_categories} where id=" . $course->category);
+//print_r("Course category path: " .$cat->path . ""<br>\n");
+$path = explode("/", $cat->path);
+$semesterCat = (safeCount($path) >= $COURSE_OF_STUDIES_PATH ? $path[1] : 0);
+if ($showsemester and (empty($semesterCat) or !isset($path[$COURSE_OF_STUDIES_PATH]))) {
+    return "";
+}
+$studiengangCat = $path[min(safeCount($path) - 1, $COURSE_OF_STUDIES_PATH)];
+//echo ""Course of Studies path: $studiengangCat<br>\n";
+if (empty($studiengangCat) and !$showsemester) {
+    return "";
+}
+
+if ($showsemester) {
+if (!isset($path[$COURSE_OF_STUDIES_PATH + 1])) {
+    return "./.";
+}
+$SsemesterCat = $path[$COURSE_OF_STUDIES_PATH + 1];
+$semester = $DB->get_record_sql("select id,name from {course_categories} where id=" . $SsemesterCat);
+//echo ""Semester category: $SemesterCat - Semester: $semester->name<br>\n";
+if (!$semester or !isset($semester->name) or empty($semester->name) or !stristr($semester->name, 'semester')) {
+    return "./.";
+}
+if ($link and empty($_SESSION["LoggedInAs"])) {
+    return '<a href="/course/index.php?categoryid=' . $semester->id . '" target="semester">' . $semester->name .
+    "</a>\n";
+}
+return $semester->name;
+}
+}
+if (isset($studiengangCat) and empty ($studiengang->name)) {
+$studiengang = $DB->get_record_sql("select id,name from {course_categories} where id=$studiengangCat");
+}
+//$GLOBALS["studiengang"] = $studiengang;
+// return name of studiengang
+//echo ""Course of Studies: $studiengang->name<br>\n";
+if (isset($studiengang->name) and
+!empty($studiengang->name)) {    //set new value to course->customfield_studiengang, disabled because customfield was removed
+    if ($link and !empty($studiengang->id) and empty($_SESSION["LoggedInAs"])) {
+        return '<a href="/course/index.php?categoryid=' . $studiengang->id . '" target="studiengang">' . $studiengang->name .
+        "</a>\n";
+    }
+    $_SESSION['course_of_studies'] = $studiengang->name;
+    return $studiengang->name;
+    }
+    return "";
+}
 
